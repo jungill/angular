@@ -1,11 +1,98 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Chat } from './chat';
+
+interface DisplayedMessage {
+  id: string;
+  from: string;
+  content: string;
+  status?: string;
+  mine: boolean;
+}
+
+type View = 'login' | 'register' | 'chat';
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('whatsapp-front');
+  view: View = 'login';
+
+  username = '';
+  password = '';
+  passwordConfirm = '';
+  recipient = '';
+  draft = '';
+  error = '';
+  messages: DisplayedMessage[] = [];
+
+  constructor(private chat: Chat) {}
+
+  goTo(view: View) {
+    this.view = view;
+    this.error = '';
+    this.password = '';
+    this.passwordConfirm = '';
+  }
+
+  doLogin() {
+    this.error = '';
+    if (!this.username.trim() || !this.password) {
+      this.error = 'Identifiant et mot de passe requis';
+      return;
+    }
+    this.chat.login(this.username, this.password).subscribe({
+      next: (res) => this.onToken(res.token),
+      error: () => (this.error = 'Identifiants invalides')
+    });
+  }
+
+  doRegister() {
+    this.error = '';
+    if (!this.username.trim() || !this.password) {
+      this.error = 'Identifiant et mot de passe requis';
+      return;
+    }
+    if (this.password !== this.passwordConfirm) {
+      this.error = 'Les mots de passe ne correspondent pas';
+      return;
+    }
+    this.chat.register(this.username, this.password).subscribe({
+      next: (res) => this.onToken(res.token),
+      error: (err) =>
+        (this.error =
+          err.status === 409
+            ? 'Cet identifiant est deja pris'
+            : 'Inscription impossible')
+    });
+  }
+
+  private onToken(token: string) {
+    this.password = '';
+    this.passwordConfirm = '';
+    this.view = 'chat';
+  }
+
+  send() {
+    if (!this.draft.trim() || !this.recipient.trim()) return;
+    const id = this.chat.send(this.recipient, this.draft);
+    this.messages.push({
+      id,
+      from: this.username,
+      content: this.draft,
+      mine: true
+    });
+    this.draft = '';
+  }
+
+  tick(status?: string): string {
+    if (status === 'DELIVERED' || status === 'DELIVERY_NOTIFIED') return '✓✓';
+    if (status === 'SENT') return '✓';
+    return '';
+  }
 }

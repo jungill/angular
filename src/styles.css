@@ -1,1 +1,28 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --teal: #075e54;
+  --teal-light: #128c7e;
+  --bubble-mine: #d9fdd3;
+  --bubble-other: #ffffff;
+  --page: #e9edef;
+  --text: #111b21;
+  --text-soft: #667781;
+  --line: #e2e6e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--page);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
