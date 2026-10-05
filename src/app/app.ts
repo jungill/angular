@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chat } from './chat';
+import { Chat, Envelope } from './chat';
 
 interface DisplayedMessage {
   id: string;
@@ -73,9 +73,25 @@ export class App {
   }
 
   private onToken(token: string) {
+    this.chat.connect(token);
+    this.chat.incoming.subscribe((e) => this.handle(e));
     this.password = '';
     this.passwordConfirm = '';
     this.view = 'chat';
+  }
+
+  private handle(e: Envelope) {
+    if (e.type === 'message') {
+      this.messages.push({
+        id: e.id!,
+        from: e.from!,
+        content: e.content!,
+        mine: false
+      });
+    } else if (e.type === 'ack') {
+      const target = this.messages.find((m) => m.id === e.messageId);
+      if (target) target.status = e.status;
+    }
   }
 
   send() {
