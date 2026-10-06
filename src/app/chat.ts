@@ -41,8 +41,8 @@ export class Chat {
   connect(token: string) {
     this.me = token;
     this.channel = new BroadcastChannel('whatsapp');
-    this.channel.addEventListener('message', (event) =>
-      this.receive(event.data as Envelope)
+    this.channel.addEventListener('message', (event) => // message est un évènement défini
+      this.receive(event.data as Envelope)              // dans BroadcastChannel
     );
     setTimeout(() => this.deliverPending());
   }
@@ -72,8 +72,8 @@ export class Chat {
   private deliver(message: Envelope) {
     this.removePending(message.id!);
     this.incoming.next(message);
-    this.channel?.postMessage({
-      type: 'ack',
+    this.channel?.postMessage({ // channel? = si channel vaut undeefined ne fait rien, sinon appel postMessage
+      type: 'ack',              // .postMessage envoie ce 'ack' à tous les autres onglets du broadcast 'whatsapp'
       messageId: message.id,
       status: 'DELIVERED',
       to: message.from
