@@ -32,7 +32,7 @@
 <div class="app" *ngIf="view === 'chat'">
   <div class="header">
     <h2>{{ username }}</h2>
-    <button>Se deconnecter</button>
+      <button (click)="logout()">Se deconnecter</button>
   </div>
 
   <input [(ngModel)]="recipient" placeholder="Destinataire" />

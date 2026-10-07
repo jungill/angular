@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Chat, Envelope } from './chat';
+import { Subscription } from 'rxjs';
 
 interface DisplayedMessage {
   id: string;
@@ -30,6 +31,7 @@ export class App {
   draft = '';
   error = '';
   messages: DisplayedMessage[] = [];
+  private subscription?: Subscription;
 
   constructor(private chat: Chat) {}
 
@@ -72,9 +74,23 @@ export class App {
     });
   }
 
+  logout() {
+    this.subscription?.unsubscribe();
+    this.subscription = undefined;
+    this.chat.disconnect();
+
+    this.messages = [];
+    this.recipient = '';
+    this.draft = '';
+    this.password = '';
+    this.passwordConfirm = '';
+    this.error = '';
+    this.view = 'login';
+  }
+
   private onToken(token: string) {
     this.chat.connect(token);
-    this.chat.incoming.subscribe((e) => this.handle(e));
+    this.subscription = this.chat.incoming.subscribe((e) => this.handle(e));
     this.password = '';
     this.passwordConfirm = '';
     this.view = 'chat';

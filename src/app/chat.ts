@@ -39,6 +39,7 @@ export class Chat {
   }
 
   connect(token: string) {
+    this.disconnect();
     this.me = token;
     this.channel = new BroadcastChannel('whatsapp');
     this.channel.addEventListener('message', (event) => // message est un évènement défini dans BroadcastChannel
@@ -103,5 +104,11 @@ export class Chat {
   private removePending(id: string) {
     const pending = this.readPending().filter((m) => m.id !== id);
     localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+  }
+
+  disconnect() {
+    this.channel?.close();
+    this.channel = undefined;
+    this.me = undefined;
   }
 }
